@@ -42,12 +42,12 @@ def train(model,epochs,lr,dataloader):
         for coords, padding_mask, confidence, tokens in dataloader:
             prev_output_tokens = tokens[:, :-1]
             target = tokens[:, 1:]
-            c = coords[:,:,[0,1,2,3],:]
-            adc = coords[:,:,[0,1,2,4,5,6,7,8],:]
+            c = coords[:,:,[0,1,2,3],:] # the four backbone atoms
+            adc = coords[:,:,[0,1,2,4,5,6,7,8],:] # eight atoms which is used to compute dihedral angles
             logits,_ = model.forward(c,adc,padding_mask.bool(),confidence,prev_output_tokens)
             loss = F.cross_entropy(logits, target, reduction='none')
-            loss = loss[0].cpu().detach().numpy()
             loss.backward()
+            loss = loss[0].cpu().detach().numpy()
             ls.append(sum(loss))
             optimizer.step()
             optimizer.zero_grad()
